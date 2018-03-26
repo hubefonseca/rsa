@@ -1,0 +1,8 @@
+[package]
+name = "rsa"
+version = "0.1.0"
+authors = ["Hubert Fonseca <hubefonseca@gmail.com>"]
+
+[dependencies]
+rand = "0.4.2"
+num = "*"
