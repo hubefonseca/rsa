@@ -60,6 +60,6 @@ mod test {
 
     #[test]
     fn simple_generate() {
-        assert_eq!((0, 0, 0, 0, 0), generate(8));
+        assert_eq!((0.to_biguint().unwrap(), 0.to_biguint().unwrap(), 0.to_biguint().unwrap()), generate(8));
     }
 }
