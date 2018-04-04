@@ -1,44 +1,63 @@
 extern crate num;
 extern crate rand;
 
-use num::bigint::{RandBigInt, ToBigUint};
-use num::{BigUint, CheckedSub};
-use num::integer::lcm;
+use num::bigint::{RandBigInt, ToBigInt};
+use num::{BigInt, CheckedSub};
+use num::integer::{lcm,gcd};
 use num::{One};
 
 use primes::is_prime;
+use numbers::modinverse;
 
 pub mod primes;
+pub mod numbers;
 
-pub fn generate(size: usize) -> (BigUint, BigUint, BigUint) {
-    let p = random_prime(size);
-    let q = random_prime(size);
-
-    println!("p {}, q {}", p, q);
-
-    let one: BigUint = One::one();
-
-    let lambda = lcm(p.checked_sub(&one).unwrap(), q.checked_sub(&one).unwrap());
-
-    (p, q, lambda)
+pub struct PublicKey {
+    e: BigInt,
+    n: BigInt
 }
 
-fn random_prime(bits: usize) -> BigUint {
+pub struct PrivateKey {
+    d: BigInt,
+    n: BigInt
+}
+
+pub fn generate(size: usize) -> (BigInt, BigInt, BigInt) {
+    let p = random_prime(size / 2);
+    let q = random_prime(size / 2);
+    let e = 65537.to_bigint().unwrap();
+
+    let one: BigInt = One::one();
+    let lambda = lcm(p.checked_sub(&one).unwrap(), q.checked_sub(&one).unwrap());
+
+    let n = &p * &q;
+    println!("n {}, lambda {}, -1 {}", n, lambda, &-1.to_bigint().unwrap());
+
+//    let d = BigInt::modpow(&e, &-1.to_bigint().unwrap(), &lambda).to_bigint().unwrap();
+//    let d = modinverse(&e, &lambda).unwrap();
+    let d = -1.to_bigint().unwrap();
+
+    println!("p {}, q {}, e {}, n {}, d {}", p, q, e, n, d);
+
+    (e, n, d)
+}
+
+fn random_prime(bits: usize) -> BigInt {
     let mut thread_rng = rand::thread_rng();
 
-    let mut a: BigUint = 6074001000u64.to_biguint().unwrap();
-    let mut b: BigUint = One::one();
+    let mut a: BigInt = 6074001000u64.to_bigint().unwrap();
+    let mut b: BigInt = One::one();
 
     a = a << (bits - 33);
     b = b << bits;
 
-    let one: BigUint = One::one();
+    let one: BigInt = One::one();
     b = b.checked_sub(&one).unwrap();
 
-    let mut p: BigUint = One::one();
+    let mut p: BigInt = One::one();
 
     loop {
-        p = thread_rng.gen_biguint_range(&a, &b);
+        p = thread_rng.gen_bigint_range(&a, &b);
 
         println!("p {}", p);
 
@@ -60,6 +79,6 @@ mod test {
 
     #[test]
     fn simple_generate() {
-        assert_eq!((0.to_biguint().unwrap(), 0.to_biguint().unwrap(), 0.to_biguint().unwrap()), generate(8));
+        assert_eq!((0.to_bigint().unwrap(), 0.to_bigint().unwrap(), 0.to_bigint().unwrap()), generate(8));
     }
 }
